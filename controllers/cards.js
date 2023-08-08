@@ -20,9 +20,7 @@ function createCard(req, res) {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => {
-      res.status(201).send(card);
-    })
+    .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_BAD_REQUEST).send({
@@ -38,7 +36,14 @@ function createCard(req, res) {
 
 function deleteCardById(req, res) {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        return res.status(ERROR_NOT_FOUND).send({
+          message: 'Карточка или пользователь не найден',
+        });
+      }
+      return res.status(200).send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_BAD_REQUEST).send({
@@ -47,7 +52,7 @@ function deleteCardById(req, res) {
         });
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_NOT_FOUND).send({
+        return res.status(ERROR_BAD_REQUEST).send({
           message: 'Карточка или пользователь не найден',
         });
       }
@@ -61,16 +66,23 @@ function likeCard(req, res) {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        return res.status(ERROR_NOT_FOUND).send({
+          message: 'Карточка или пользователь не найден',
+        });
+      }
+      return res.status(200).send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_BAD_REQUEST).send({
+        return res.status(ERROR_NOT_FOUND).send({
           message:
             'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
         });
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_NOT_FOUND).send({
+        return res.status(ERROR_BAD_REQUEST).send({
           message: 'Карточка или пользователь не найден',
         });
       }
@@ -84,7 +96,14 @@ function dislikeCard(req, res) {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        return res.status(ERROR_NOT_FOUND).send({
+          message: 'Карточка или пользователь не найден',
+        });
+      }
+      return res.status(200).send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_BAD_REQUEST).send({
@@ -93,7 +112,7 @@ function dislikeCard(req, res) {
         });
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_NOT_FOUND).send({
+        return res.status(ERROR_BAD_REQUEST).send({
           message: 'Карточка или пользователь не найден',
         });
       }

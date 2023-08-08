@@ -19,10 +19,6 @@ const app = express();
 
 app.use(express.json()); // вместо bodyParser
 
-app.get('/', (req, res) => {
-  res.send({ message: 'Все хорошо!' });
-});
-
 app.use((req, res, next) => {
   req.user = {
     _id: '64cf87c4b33526506de854e5',
