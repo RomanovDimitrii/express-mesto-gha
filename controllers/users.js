@@ -12,7 +12,7 @@ function getUsers(req, res) {
     })
     .catch((err) => res
       .status(ERROR_INTERNAL_SERVER)
-      .send({ message: `Произошла ошибка ${err.message}` }));
+      .send({ message: `На сервере произошла ошибка ${err.message}` }));
 }
 
 function getUser(req, res) {
@@ -37,7 +37,9 @@ function getUser(req, res) {
           message: 'Карточка или пользователь не найден',
         });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res
+        .status(ERROR_INTERNAL_SERVER)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -55,7 +57,9 @@ function createUser(req, res) {
             'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
         });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res
+        .status(ERROR_INTERNAL_SERVER)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -85,7 +89,9 @@ function changeProfile(req, res) {
           message: 'Карточка или пользователь не найден',
         });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res
+        .status(ERROR_INTERNAL_SERVER)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 

@@ -12,7 +12,7 @@ function getCards(req, res) {
     })
     .catch((err) => res
       .status(ERROR_INTERNAL_SERVER)
-      .send({ message: `Произошла ошибка ${err.message}` }));
+      .send({ message: `На сервере произошла ошибка ${err.message}` }));
 }
 
 function createCard(req, res) {
@@ -30,7 +30,7 @@ function createCard(req, res) {
       }
       return res
         .status(ERROR_INTERNAL_SERVER)
-        .send({ message: 'Произошла ошибка' });
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -56,7 +56,9 @@ function deleteCardById(req, res) {
           message: 'Карточка или пользователь не найден',
         });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res
+        .status(ERROR_INTERNAL_SERVER)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -86,7 +88,9 @@ function likeCard(req, res) {
           message: 'Карточка или пользователь не найден',
         });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res
+        .status(ERROR_INTERNAL_SERVER)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -116,7 +120,9 @@ function dislikeCard(req, res) {
           message: 'Карточка или пользователь не найден',
         });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res
+        .status(ERROR_INTERNAL_SERVER)
+        .send({ message: 'На сервере произошла ошибка' });
     });
 }
 
