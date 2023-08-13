@@ -1,20 +1,51 @@
-const router = require('express').Router();
+const router = require("express").Router();
+const { celebrate, Joi } = require("celebrate");
+
+const auth = require("../middlewares/auth");
 
 const {
   getUsers,
-  getUser,
+  getUserById,
   createUser,
   changeProfile,
-} = require('../controllers/users');
+  login,
+  getUserProfile,
+} = require("../controllers/users");
 
-router.get('/', getUsers);
+router.post(
+  "/signup",
+  celebrate({
+    body: Joi.object()
+      .keys({
+        email: Joi.string().required(),
+        password: Joi.string().required().min(8),
+      })
+      .unknown(true),
+  }),
+  createUser
+);
 
-router.get('/:id', getUser);
+router.post(
+  "/signin",
+  celebrate({
+    body: Joi.object()
+      .keys({
+        email: Joi.string().required(),
+        password: Joi.string().required().min(8),
+      })
+      .unknown(true),
+  }),
+  login
+);
 
-router.post('/', createUser);
+router.get("/", auth, getUsers);
 
-router.patch('/me', changeProfile);
+router.get("/me", auth, getUserProfile);
 
-router.patch('/me/avatar', changeProfile);
+router.get("/:id", auth, getUserById);
+
+router.patch("/me", auth, changeProfile);
+
+router.patch("/me/avatar", auth, changeProfile);
 
 module.exports = router;
