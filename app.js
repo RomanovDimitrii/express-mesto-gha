@@ -43,11 +43,11 @@ app.use("/users", userRouter);
 
 app.use("/cards", cardsRouter);
 
+app.use(errors()); // обработчик ошибок celebrate
+
 app.use((req, res) => {
   res.status(404).send({ message: `Ресурс по адресу ${req.path} не найден` });
 });
-
-app.use(errors()); // обработчик ошибок celebrate
 
 app.listen(PORT, () => {
   console.log(`Application is running on port ${PORT} `);

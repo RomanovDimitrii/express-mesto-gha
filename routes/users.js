@@ -12,31 +12,16 @@ const {
   getUserProfile,
 } = require("../controllers/users");
 
-router.post(
-  "/signup",
-  celebrate({
-    body: Joi.object()
-      .keys({
-        email: Joi.string().required(),
-        password: Joi.string().required().min(8),
-      })
-      .unknown(true),
-  }),
-  createUser
-);
+const {
+  signUpValidator,
+  signInValidator,
+  changeProfileValidator,
+  changeAvatarValidator,
+} = require("../utils/validators");
 
-router.post(
-  "/signin",
-  celebrate({
-    body: Joi.object()
-      .keys({
-        email: Joi.string().required(),
-        password: Joi.string().required().min(8),
-      })
-      .unknown(true),
-  }),
-  login
-);
+router.post("/signup", signUpValidator, createUser);
+
+router.post("/signin", signInValidator, login);
 
 router.get("/", auth, getUsers);
 
@@ -44,8 +29,8 @@ router.get("/me", auth, getUserProfile);
 
 router.get("/:id", auth, getUserById);
 
-router.patch("/me", auth, changeProfile);
+router.patch("/me", auth, changeProfileValidator, changeProfile);
 
-router.patch("/me/avatar", auth, changeProfile);
+router.patch("/me/avatar", auth, changeAvatarValidator, changeProfile);
 
 module.exports = router;

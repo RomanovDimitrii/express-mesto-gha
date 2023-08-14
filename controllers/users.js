@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt"); // импортируем bcrypt
-//const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 
-//const JWT_SECRET = "secret-key";
+// const JWT_SECRET = "secret-key";
 
 const User = require("../models/user");
 const { generateToken } = require("../utils/token");
@@ -88,7 +88,7 @@ function createUser(req, res) {
     password,
   } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
-    //  console.log(hash);
+    //console.log(hash);
     User.create({
       name,
       about,
@@ -110,7 +110,7 @@ function createUser(req, res) {
         if (err.name === "ValidationError") {
           return res.status(ERROR_BAD_REQUEST).send({
             message:
-              "Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля",
+              "Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля1",
           });
         }
         return res

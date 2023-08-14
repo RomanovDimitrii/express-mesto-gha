@@ -10,14 +10,15 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    validate: {
-      validator(v) {
-        return /https?:\/\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/.test(
-          v
-        );
-      },
-      message: (props) => `${props.value} некорректный адрес`,
-    },
+    required: false,
+    // validate: {
+    //   validator(v) {
+    //     return /https?:\/\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/.test(
+    //       v
+    //     );
+    //   },
+    //   message: (props) => `${props.value} некорректный адрес`,
+    // },
   },
   email: {
     type: String,
