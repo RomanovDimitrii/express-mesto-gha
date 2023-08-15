@@ -1,11 +1,12 @@
-const bcrypt = require('bcrypt'); // импортируем bcrypt
+const bcrypt = require("bcrypt"); // импортируем bcrypt
 // const jwt = require("jsonwebtoken");
 
 // const JWT_SECRET = "secret-key";
 
-const User = require('../models/user');
-const { generateToken } = require('../utils/token');
-const { ERROR_NOT_FOUND } = require('../errors/errors');
+const User = require("../models/user");
+const { generateToken } = require("../utils/token");
+const { AuthError } = require("../errors/AuthError");
+const { NotFoundError } = require("../errors/NotFoundError");
 
 function getUsers(req, res, next) {
   User.find()
@@ -18,13 +19,16 @@ function getUsers(req, res, next) {
 }
 
 function getUserById(req, res, next) {
+  console.log(req);
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'Карточка или пользователь не найден',
-        });
+        throw new NotFoundError("Карточка или пользователь не найден");
+        // return res.status(ERROR_NOT_FOUND).send({
+        //   message: "Карточка или пользователь не найден",
+        //     });
       }
+
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
@@ -36,9 +40,7 @@ function getUserProfile(req, res, next) {
   User.findById(req.user)
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'Карточка или пользователь не найден',
-        });
+        throw new NotFoundError("Карточка или пользователь не найден");
       }
       return res.status(200).send({ data: user });
     })
@@ -49,9 +51,9 @@ function getUserProfile(req, res, next) {
 
 function createUser(req, res, next) {
   const {
-    name = 'Жак-Ив Кусто',
-    about = 'Исследователь',
-    avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    name = "Жак-Ив Кусто",
+    about = "Исследователь",
+    avatar = "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
     email,
     password,
   } = req.body;
@@ -91,7 +93,7 @@ function changeProfile(req, res, next) {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
       upsert: false, // если пользователь не найден, он не будет создан
-    },
+    }
   )
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
@@ -101,23 +103,21 @@ function changeProfile(req, res, next) {
 
 function login(req, res, next) {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      // аутентификация успешна! пользователь в переменной user
       const payload = { _id: user._id };
       const token = generateToken(payload);
       res
-        .cookie('jwt', token, {
+        .cookie("jwt", token, {
           //     maxAge: 3600000,
           httpOnly: true,
         })
-        .end(token);
+        .send({ message: "Пользователь авторизован" });
+
+      // .end({ message: "Пользователь авторизован" });
     })
     .catch((err) => {
-      next(err);
-      // ошибка аутентификации
-      //   console.log(err);
-      //  res.status(401).send({ message: err.message });
+      next(new AuthError(`Ошибка email или пароля ${err}`));
     });
 }
 

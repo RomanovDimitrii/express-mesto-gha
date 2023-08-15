@@ -1,9 +1,6 @@
-const Card = require('../models/card');
-const {
-  ERROR_BAD_REQUEST,
-  ERROR_NOT_FOUND,
-  // ERROR_INTERNAL_SERVER,
-} = require('../errors/errors');
+const Card = require("../models/card");
+const { NotFoundError } = require("../errors/NotFoundError");
+const { UnallowedActionError } = require("../errors/UnallowedAction");
 
 function getCards(req, res, next) {
   Card.find()
@@ -30,18 +27,14 @@ function deleteCardById(req, res, next) {
   Card.findById(req.params.cardId) // Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'Карточка или пользователь не найден',
-        });
+        throw new NotFoundError("Карточка или пользователь не найден");
       }
-      if (card.owner !== req.user._id) {
-        return res.status(ERROR_BAD_REQUEST).send({
-          message: 'Нет прав на удаление карточки',
-        });
+      if (card.owner != req.user._id) {
+        throw new UnallowedActionError("Нет прав на удаление карточки");
       }
-      return Card.deleteOne(card)
-        .then((deletedCard) => res.status(200)
-          .send({ data: deletedCard }));
+      return Card.deleteOne(card).then((deletedCard) =>
+        res.status(200).send({ data: deletedCard })
+      );
     })
     .catch((err) => {
       next(err);
@@ -52,13 +45,11 @@ function likeCard(req, res, next) {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true },
+    { new: true }
   )
     .then((card) => {
       if (!card) {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'Карточка или пользователь не найден',
-        });
+        throw new NotFoundError("Карточка или пользователь не найден");
       }
       return res.status(200).send({ data: card });
     })
@@ -71,13 +62,11 @@ function dislikeCard(req, res, next) {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true },
+    { new: true }
   )
     .then((card) => {
       if (!card) {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'Карточка или пользователь не найден',
-        });
+        throw new NotFoundError("Карточка или пользователь не найден");
       }
       return res.status(200).send({ data: card });
     })
