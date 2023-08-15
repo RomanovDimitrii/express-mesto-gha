@@ -1,94 +1,62 @@
-const bcrypt = require("bcrypt"); // импортируем bcrypt
+const bcrypt = require('bcrypt'); // импортируем bcrypt
 // const jwt = require("jsonwebtoken");
 
 // const JWT_SECRET = "secret-key";
 
-const User = require("../models/user");
-const { generateToken } = require("../utils/token");
-const {
-  ERROR_BAD_REQUEST,
-  ERROR_NOT_FOUND,
-  ERROR_INTERNAL_SERVER,
-} = require("../errors/errors");
+const User = require('../models/user');
+const { generateToken } = require('../utils/token');
+const { ERROR_NOT_FOUND } = require('../errors/errors');
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   User.find()
     .then((users) => {
       res.status(200).send(users);
     })
-    .catch((err) =>
-      res
-        .status(ERROR_INTERNAL_SERVER)
-        .send({ message: `На сервере произошла ошибка ${err.message}` })
-    );
+    .catch((err) => {
+      next(err);
+    });
 }
 
-function getUserById(req, res) {
+function getUserById(req, res, next) {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "Карточка или пользователь не найден",
+          message: 'Карточка или пользователь не найден',
         });
       }
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(ERROR_BAD_REQUEST).send({
-          message:
-            "Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля",
-        });
-      }
-      if (err.name === "CastError") {
-        return res.status(ERROR_BAD_REQUEST).send({
-          message: "Карточка или пользователь не найден",
-        });
-      }
-      return res
-        .status(ERROR_INTERNAL_SERVER)
-        .send({ message: "На сервере произошла ошибка" });
+      next(err);
     });
 }
 
-function getUserProfile(req, res) {
+function getUserProfile(req, res, next) {
   User.findById(req.user)
     .then((user) => {
       if (!user) {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "Карточка или пользователь не найден",
+          message: 'Карточка или пользователь не найден',
         });
       }
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(ERROR_BAD_REQUEST).send({
-          message:
-            "Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля",
-        });
-      }
-      if (err.name === "CastError") {
-        return res.status(ERROR_BAD_REQUEST).send({
-          message: "Карточка или пользователь не найден",
-        });
-      }
-      return res
-        .status(ERROR_INTERNAL_SERVER)
-        .send({ message: "На сервере произошла ошибка" });
+      next(err);
     });
 }
 
-function createUser(req, res) {
+function createUser(req, res, next) {
   const {
-    name = "Жак-Ив Кусто",
-    about = "Исследователь",
-    avatar = "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
+    name = 'Жак-Ив Кусто',
+    about = 'Исследователь',
+    avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     email,
     password,
   } = req.body;
+
   bcrypt.hash(password, 10).then((hash) => {
-    //console.log(hash);
     User.create({
       name,
       about,
@@ -107,20 +75,12 @@ function createUser(req, res) {
         });
       })
       .catch((err) => {
-        if (err.name === "ValidationError") {
-          return res.status(ERROR_BAD_REQUEST).send({
-            message:
-              "Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля1",
-          });
-        }
-        return res
-          .status(ERROR_INTERNAL_SERVER)
-          .send({ message: "На сервере произошла ошибка" });
+        next(err);
       });
   });
 }
 
-function changeProfile(req, res) {
+function changeProfile(req, res, next) {
   const { name, about, avatar } = req.body;
   const owner = req.user._id;
 
@@ -131,28 +91,15 @@ function changeProfile(req, res) {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
       upsert: false, // если пользователь не найден, он не будет создан
-    }
+    },
   )
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(ERROR_BAD_REQUEST).send({
-          message:
-            "Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля",
-        });
-      }
-      if (err.name === "CastError") {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: "Карточка или пользователь не найден",
-        });
-      }
-      return res
-        .status(ERROR_INTERNAL_SERVER)
-        .send({ message: "На сервере произошла ошибка" });
+      next(err);
     });
 }
 
-function login(req, res) {
+function login(req, res, next) {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -160,15 +107,17 @@ function login(req, res) {
       const payload = { _id: user._id };
       const token = generateToken(payload);
       res
-        .cookie("jwt", token, {
+        .cookie('jwt', token, {
           //     maxAge: 3600000,
           httpOnly: true,
         })
         .end(token);
     })
     .catch((err) => {
+      next(err);
       // ошибка аутентификации
-      res.status(401).send({ message: err.message });
+      //   console.log(err);
+      //  res.status(401).send({ message: err.message });
     });
 }
 

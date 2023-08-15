@@ -1,4 +1,4 @@
-const { celebrate, Joi } = require("celebrate");
+const { celebrate, Joi } = require('celebrate');
 
 const signUpValidator = celebrate({
   body: Joi.object().keys({
@@ -7,7 +7,7 @@ const signUpValidator = celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().regex(
-      /https?:\/\/(www)?[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/
+      /https?:\/\/(www)?[0-9a-z\-._~:/?#[\]@!$'()*+,;=]+#?$/i,
     ),
   }),
   //     .unknown(true),  //позволяет в запрос включать другие поля,помимо email и password
@@ -31,7 +31,7 @@ const changeProfileValidator = celebrate({
 const changeAvatarValidator = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().regex(
-      /https?:\/\/(www)?[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/
+      /https?:\/\/(www)?[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/,
     ),
   }),
 });

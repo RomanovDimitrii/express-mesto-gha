@@ -1,16 +1,18 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const { errors } = require("celebrate");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 
-const userRouter = require("./routes/users");
-const cardsRouter = require("./routes/cards");
-const { createUser, login } = require("./controllers/users");
+const userRouter = require('./routes/users');
+const cardsRouter = require('./routes/cards');
+const errorHandleMiddleware = require('./middlewares/errorHandleMiddleware');
+const { createUser, login } = require('./controllers/users');
+const { signUpValidator, signInValidator } = require('./utils/validators');
 
 const { PORT = 3000 } = process.env;
 
-mongoose.connect("mongodb://127.0.0.1:27017/mestodb", {
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
   useUnifiedTopology: false,
   // useCreateIndex: true,
@@ -35,15 +37,17 @@ app.use(cors());
 //   next();
 // });
 
-app.post("/signin", login);
+app.post('/signin', signInValidator, login);
 
-app.post("/signup", createUser);
+app.post('/signup', signUpValidator, createUser);
 
-app.use("/users", userRouter);
+app.use('/users', userRouter);
 
-app.use("/cards", cardsRouter);
+app.use('/cards', cardsRouter);
 
 app.use(errors()); // обработчик ошибок celebrate
+
+app.use(errorHandleMiddleware);
 
 app.use((req, res) => {
   res.status(404).send({ message: `Ресурс по адресу ${req.path} не найден` });
