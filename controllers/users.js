@@ -1,21 +1,19 @@
-const bcrypt = require("bcrypt"); // импортируем bcrypt
+const bcrypt = require('bcrypt'); // импортируем bcrypt
 // const jwt = require("jsonwebtoken");
 
 // const JWT_SECRET = "secret-key";
 
-const User = require("../models/user");
-const { generateToken } = require("../utils/token");
-const { AuthError } = require("../errors/AuthError");
-const { NotFoundError } = require("../errors/NotFoundError");
+const User = require('../models/user');
+const { generateToken } = require('../utils/token');
+const { AuthError } = require('../errors/AuthError');
+const { NotFoundError } = require('../errors/NotFoundError');
 
 function getUsers(req, res, next) {
   User.find()
     .then((users) => {
       res.status(200).send(users);
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 }
 
 function getUserById(req, res, next) {
@@ -23,37 +21,30 @@ function getUserById(req, res, next) {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Карточка или пользователь не найден");
-        // return res.status(ERROR_NOT_FOUND).send({
-        //   message: "Карточка или пользователь не найден",
-        //     });
+        throw new NotFoundError('Карточка или пользователь не найден');
       }
 
       return res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 }
 
 function getUserProfile(req, res, next) {
   User.findById(req.user)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Карточка или пользователь не найден");
+        throw new NotFoundError('Карточка или пользователь не найден');
       }
       return res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 }
 
 function createUser(req, res, next) {
   const {
-    name = "Жак-Ив Кусто",
-    about = "Исследователь",
-    avatar = "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
+    name = 'Жак-Ив Кусто',
+    about = 'Исследователь',
+    avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     email,
     password,
   } = req.body;
@@ -76,9 +67,7 @@ function createUser(req, res, next) {
           _id: user._id,
         });
       })
-      .catch((err) => {
-        next(err);
-      });
+      .catch(next);
   });
 }
 
@@ -93,12 +82,10 @@ function changeProfile(req, res, next) {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
       upsert: false, // если пользователь не найден, он не будет создан
-    }
+    },
   )
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 }
 
 function login(req, res, next) {
@@ -108,11 +95,11 @@ function login(req, res, next) {
       const payload = { _id: user._id };
       const token = generateToken(payload);
       res
-        .cookie("jwt", token, {
+        .cookie('jwt', token, {
           //     maxAge: 3600000,
           httpOnly: true,
         })
-        .send({ message: "Пользователь авторизован" });
+        .send({ message: 'Пользователь авторизован' });
 
       // .end({ message: "Пользователь авторизован" });
     })

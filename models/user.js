@@ -11,14 +11,6 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: false,
-    // validate: {
-    //   validator(v) {
-    //     return /https?:\/\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/.test(
-    //       v
-    //     );
-    //   },
-    //   message: (props) => `${props.value} некорректный адрес`,
-    // },
   },
   email: {
     type: String,
@@ -34,7 +26,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
     select: false, // чтобы API не возвращал хеш пароля
   },
 });
